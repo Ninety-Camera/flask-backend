@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+from datetime import datetime
 
 cap = cv2.VideoCapture(0) #set the input here
 whT = 320
@@ -54,7 +54,17 @@ def findObjects(outputs,img):
             print("nothing detected!")
     return humanDetected
 
-instrusionFrameCollection = [] #frame collection for notify users
+def notify(frames):
+    print("generating a video from the frames")
+  
+    out = cv2.VideoWriter('suspect.avi',cv2.VideoWriter_fourcc(*'XVID'),20,(640,480))
+    for frame in frames:
+        out.write(frame)
+
+        
+    out.release()
+    print("video saved!")    
+
 
 while True:
     success, img = cap.read()
@@ -67,9 +77,26 @@ while True:
     outputs = net.forward(outputNames)
     humanDetected = findObjects(outputs,img)
     
+    if humanDetected:
+        print("human detected. starting saving a clip...")
+        startTime = datetime.now()
+        timeDifference = 0
+        frameCollection = []
+        while timeDifference < 10:
+            presentTime = datetime.now()
+            timeDifference = (presentTime - startTime).total_seconds()
+            print("frame saving : time difference",timeDifference)
+            
+            success, img = cap.read()
     
-
-        
+            frameCollection.append(img)
+            cv2.imshow('Image', img)
+            key = cv2.waitKey(1)
+            
+        notify(frameCollection)
+        break
+            
+            
  
     cv2.imshow('Image', img)
     key = cv2.waitKey(1)
@@ -77,4 +104,4 @@ while True:
     # this is for terminating the program
     if key == ord("q"):
         break
-    
+
