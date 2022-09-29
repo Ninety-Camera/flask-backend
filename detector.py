@@ -65,43 +65,43 @@ def notify(frames):
     out.release()
     print("video saved!")    
 
-
-while True:
-    success, img = cap.read()
-    
-    blob = cv2.dnn.blobFromImage(img,1/255,(whT,whT),[0,0,0],1,crop=False)
-    net.setInput(blob)
-    
-    layerNames = net.getLayerNames()
-    outputNames = [(layerNames[i - 1]) for i in net.getUnconnectedOutLayers()]
-    outputs = net.forward(outputNames)
-    humanDetected = findObjects(outputs,img)
-    
-    if humanDetected:
-        print("human detected. starting saving a clip...")
-        startTime = datetime.now()
-        timeDifference = 0
-        frameCollection = []
-        while timeDifference < 10:
-            presentTime = datetime.now()
-            timeDifference = (presentTime - startTime).total_seconds()
-            print("frame saving : time difference",timeDifference)
-            
-            success, img = cap.read()
-    
-            frameCollection.append(img)
-            cv2.imshow('Image', img)
-            key = cv2.waitKey(1)
-            
-        notify(frameCollection)
-        break
+def detect():
+    while True:
+        success, img = cap.read()
+        
+        blob = cv2.dnn.blobFromImage(img,1/255,(whT,whT),[0,0,0],1,crop=False)
+        net.setInput(blob)
+        
+        layerNames = net.getLayerNames()
+        outputNames = [(layerNames[i - 1]) for i in net.getUnconnectedOutLayers()]
+        outputs = net.forward(outputNames)
+        humanDetected = findObjects(outputs,img)
+        
+        if humanDetected:
+            print("human detected. starting saving a clip...")
+            startTime = datetime.now()
+            timeDifference = 0
+            frameCollection = []
+            while timeDifference < 10:
+                presentTime = datetime.now()
+                timeDifference = (presentTime - startTime).total_seconds()
+                print("frame saving : time difference",timeDifference)
+                
+                success, img = cap.read()
+        
+                frameCollection.append(img)
+                cv2.imshow('Image', img)
+                key = cv2.waitKey(1)
+                
+            notify(frameCollection)
+            break
             
             
  
-    cv2.imshow('Image', img)
-    key = cv2.waitKey(1)
-    
-    # this is for terminating the program
-    if key == ord("q"):
-        break
+        cv2.imshow('Image', img)
+        key = cv2.waitKey(1)
+        
+        # this is for terminating the program
+        if key == ord("q"):
+            break
 
