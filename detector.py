@@ -21,8 +21,7 @@ net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 # This function will identify humans and draw a rectangle around the object.
 # returning boolean input frame contains a human or not. True for a human.
-
-def findObjects(outputs,img):
+def findHumans(outputs,img):
     hT, wT, cT = img.shape
     bbox = []
     classIds = []
@@ -47,8 +46,8 @@ def findObjects(outputs,img):
         
         box = bbox[i]
         x, y, w, h = box[0], box[1], box[2], box[3]
-        # print(x,y,w,h)
         cv2.rectangle(img, (x, y), (x+w,y+h), (255, 0 , 255), 2)
+        
         try:
             cv2.putText(img,f'{classes[classIds[i]].upper()} {int(confs[i]*100)}%',
                     (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
@@ -56,13 +55,14 @@ def findObjects(outputs,img):
             humanDetected = True
         except:
             print("nothing detected!")
+            
     return humanDetected
 
 # This function will generate a video using input frame list.
-def generateVideo(frames):
+def generateVideo(frames,filename):
     print("generating a video from the frames")
   
-    out = cv2.VideoWriter('suspect.avi',cv2.VideoWriter_fourcc(*'XVID'),20,(640,480))
+    out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'XVID'),20,(640,480))
     for frame in frames:
         out.write(frame)
 
@@ -81,7 +81,7 @@ def detect():
         layerNames = net.getLayerNames()
         outputNames = [(layerNames[i - 1]) for i in net.getUnconnectedOutLayers()]
         outputs = net.forward(outputNames)
-        humanDetected = findObjects(outputs,img)
+        humanDetected = findHumans(outputs,img)
         
         if humanDetected:
             print("human detected. starting saving a clip...")
@@ -98,8 +98,8 @@ def detect():
                 frameCollection.append(img)
                 cv2.imshow('Image', img)
                 key = cv2.waitKey(1)
-                
-            generateVideo(frameCollection)
+            filename = "suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi"    
+            generateVideo(frameCollection,filename)
             break
             
             
@@ -111,3 +111,21 @@ def detect():
         if key == ord("q"):
             break
 
+# This will record all the footages from the cameras.
+def record():
+    frameCollection = []
+    timeDelta = 0
+    startingTime = datetime.now()
+    while True:
+        timeDelta = (datetime.now() - startingTime).total_seconds()
+        if timeDelta > 5*60: # set to save five minutes clips
+            filename = "clip "+startingTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi"
+            generateVideo(frameCollection,filename)
+            startingTime = datetime.now()
+            frameCollection = []
+            
+        success,img = cap.read()
+        frameCollection.append(img)
+
+        
+    
