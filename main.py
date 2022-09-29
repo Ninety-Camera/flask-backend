@@ -1,11 +1,16 @@
-from detector import detect
+import threading
+from detector import detect, record
 from webConnect import *
 
-createConnection()
+recordingThread = threading.Thread(target=record,name="recorder")
+recordingThread.start()
+
+detectionListeningThread = threading.Thread(target=createConnection,name="instrution-listener")
+detectionListeningThread.start()
+
 while True:
     if detectBool:
-        print("detection started in main..calling detection method!")
         detect()
-    
+        print("detection started!")
 
 
