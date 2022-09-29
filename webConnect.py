@@ -41,5 +41,8 @@ def instrutionMessage(message):
         print("Incorrect message!")
         
 def createConnection():
-    authDict = {"systemId":"00c2aa5b-9ed7-4cb9-9fd7-235f180caded"}
-    sio.connect('https://ninetycamera.azurewebsites.net',auth = authDict)
+    try:
+        authDict = {"systemId":"00c2aa5b-9ed7-4cb9-9fd7-235f180caded"}
+        sio.connect('https://ninetycamera.azurewebsites.net',auth = authDict)
+    except:
+        print("establishing the connection failed!")
