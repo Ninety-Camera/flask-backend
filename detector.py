@@ -3,20 +3,24 @@ import numpy as np
 from datetime import datetime
 
 cap = cv2.VideoCapture(0) #set the input here
-whT = 320
+
+whT = 320 # width and height of the video
 confThreshold =0.5
 nmsThreshold= 0.2
 
 
-classes = ["person"]
-modelConfiguration = 'yolov3.cfg'
-modelWeights = 'yolov3.weights'
+classes = ["person"] # since we are only detecting humans classes contains only person.
+modelConfiguration = 'yolov3.cfg' # directory of the yolo config file.
+modelWeights = 'yolov3.weights' # directory of the yolo weight file.
 
 
 net = cv2.dnn.readNetFromDarknet(modelConfiguration,modelWeights)
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
+
+# This function will identify humans and draw a rectangle around the object.
+# returning boolean input frame contains a human or not. True for a human.
 
 def findObjects(outputs,img):
     hT, wT, cT = img.shape
@@ -54,7 +58,8 @@ def findObjects(outputs,img):
             print("nothing detected!")
     return humanDetected
 
-def notify(frames):
+# This function will generate a video using input frame list.
+def generateVideo(frames):
     print("generating a video from the frames")
   
     out = cv2.VideoWriter('suspect.avi',cv2.VideoWriter_fourcc(*'XVID'),20,(640,480))
@@ -65,6 +70,7 @@ def notify(frames):
     out.release()
     print("video saved!")    
 
+# This is the function which capture the frames from the input and output the moderated frame.
 def detect():
     while True:
         success, img = cap.read()
@@ -93,7 +99,7 @@ def detect():
                 cv2.imshow('Image', img)
                 key = cv2.waitKey(1)
                 
-            notify(frameCollection)
+            generateVideo(frameCollection)
             break
             
             
