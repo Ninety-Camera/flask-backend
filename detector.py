@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from datetime import datetime
+import threading
 
 cap = cv2.VideoCapture(0) #set the input here
 
@@ -88,7 +89,7 @@ def detect():
             startTime = datetime.now()
             timeDifference = 0
             frameCollection = []
-            while timeDifference < 10:
+            while timeDifference < 5:
                 presentTime = datetime.now()
                 timeDifference = (presentTime - startTime).total_seconds()
                 print("frame saving : time difference",timeDifference)
@@ -98,12 +99,13 @@ def detect():
                 frameCollection.append(img)
                 cv2.imshow('Image', img)
                 key = cv2.waitKey(1)
-            filename = "suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi"    
-            generateVideo(frameCollection,filename)
-            break
+            filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
             
+            #initializing a thread for saving suspect frames into video.    
+            videoGeneratingThread = threading.Thread(target=generateVideo,name="suspect-videoGenerator",args=(frameCollection,filename))
+            videoGeneratingThread.start()
             
- 
+
         cv2.imshow('Image', img)
         key = cv2.waitKey(1)
         
@@ -116,16 +118,28 @@ def record():
     frameCollection = []
     timeDelta = 0
     startingTime = datetime.now()
+    recordingTime = 5*60
     while True:
         timeDelta = (datetime.now() - startingTime).total_seconds()
-        if timeDelta > 5*60: # set to save five minutes clips
-            filename = "clip "+startingTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi"
-            generateVideo(frameCollection,filename)
+        if timeDelta > recordingTime: # set to save five minutes clips
+            filename = "records/clip "+startingTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi"
+            
+            videoGeneratingThread = threading.Thread(target=generateVideo,name="videoGenerator",args=(frameCollection,filename))
+            videoGeneratingThread.start()
+            # generateVideo(frameCollection,filename)
+            
             startingTime = datetime.now()
             frameCollection = []
             
         success,img = cap.read()
         frameCollection.append(img)
+        
+        cv2.imshow('Image', img)
+        key = cv2.waitKey(1)
+        
+        # this is for terminating the program
+        if key == ord("q"):
+            break
 
         
     
