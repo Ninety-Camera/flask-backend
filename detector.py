@@ -72,8 +72,8 @@ def generateVideo(frames,filename):
     print("video saved!")    
 
 # This is the function which capture the frames from the input and output the moderated frame.
-def detect():
-    while True:
+def detect(detectBool):
+    while detectBool:
         success, img = cap.read()
         
         blob = cv2.dnn.blobFromImage(img,1/255,(whT,whT),[0,0,0],1,crop=False)
@@ -89,16 +89,28 @@ def detect():
             startTime = datetime.now()
             timeDifference = 0
             frameCollection = []
+            
             while timeDifference < 5:
                 presentTime = datetime.now()
                 timeDifference = (presentTime - startTime).total_seconds()
                 print("frame saving : time difference",timeDifference)
                 
                 success, img = cap.read()
-        
-                frameCollection.append(img)
-                cv2.imshow('Image', img)
-                key = cv2.waitKey(1)
+
+                if success:
+                    blob = cv2.dnn.blobFromImage(img,1/255,(whT,whT),[0,0,0],1,crop=False)
+                    net.setInput(blob)
+                    
+                    layerNames = net.getLayerNames()
+                    outputNames = [(layerNames[i - 1]) for i in net.getUnconnectedOutLayers()]
+                    outputs = net.forward(outputNames)
+                    findHumans(outputs,img)
+            
+                    frameCollection.append(img)
+                    cv2.imshow('Image', img)
+                    
+                    key = cv2.waitKey(1)
+                    
             filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
             
             #initializing a thread for saving suspect frames into video.    
@@ -132,10 +144,11 @@ def record():
             frameCollection = []
             
         success,img = cap.read()
-        frameCollection.append(img)
-        
-        cv2.imshow('Image', img)
-        key = cv2.waitKey(1)
+        if success:
+            frameCollection.append(img)
+            
+            cv2.imshow('Image', img)
+            key = cv2.waitKey(1)
         
         # this is for terminating the program
         if key == ord("q"):
