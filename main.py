@@ -2,6 +2,7 @@ import threading
 from detector import detect, record
 from webConnect import *
 
+
 # starting the recording. 
 recordingThread = threading.Thread(target=record,name="recorder")
 recordingThread.start()
@@ -13,7 +14,6 @@ detectionListeningThread.start()
 #checking for detectBool and starting human detection if it's True.
 while True:
     if detectBool:
-        detect()
+        detect(detectBool)
         print("detection started!")
-
 

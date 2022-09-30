@@ -1,24 +1,19 @@
-import numpy as np
-from datetime import datetime
-import socketio
+from operator import truediv
+import threading
+from detector import detect, record
+from webConnect import *
 
+recordingThread = threading.Thread(target=record,name="recorder")
+recordingThread.start()
 
-# standard Python
-sio = socketio.Client()
+detectionListeningThread = threading.Thread(target=createConnection,name="instrution-listener")
+detectionListeningThread.start()
 
+# detectBool = True
 
-@sio.event
-def connect():
-    print("I'm connected!")
-
-@sio.event
-def connect_error(data):
-    print("The connection failed!")
-
-@sio.event
-def disconnect():
-    print("I'm disconnected!")
-
-authDict = {"systemId":"00c2aa5b-9ed7-4cb9-9fd7-235f180caded"}
-sio.connect('https://ninetycamera.azurewebsites.net',auth = authDict,wait_timeout=10)
-
+while True:
+    if detectBool:
+        detect(detectBool)
+        print("detection started!")
+        
+        
