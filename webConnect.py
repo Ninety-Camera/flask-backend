@@ -1,18 +1,16 @@
-from doctest import FAIL_FAST
 import threading
 from trace import Trace
 import socketio
-
-from detector import record,detect
+from detector import detectThread
+from recorder import record
 
 
 # standard Python
 sio = socketio.Client(reconnection_delay=10)
 state = False
-detectionThread = threading.Thread(target=detect,name="detector",args=(state,))
+detectionThread = detectThread("detector")
 
 
-detectBool = False
 
 @sio.event
 def connect():
@@ -31,13 +29,13 @@ def disconnect():
 def instrutionMessage(message):
     global detectionThread
     print("message recieved",message)
-    if message == "Stop Proccessing":
+    if message == "STOP":
         print("Human detection deactivated!")
-        state = False
+        detectThread.raise_exception()
+        detectionThread.join()
         
     elif message == "RUNNING":
         print("Human detection activated!")
-        state = True
         detectionThread.start()
         
     
@@ -53,8 +51,8 @@ def createConnection():
         
 def main():
     # recording starts in another thread.
-    recordingThread = threading.Thread(target=record,name="recorder")
-    recordingThread.start()
+    # recordingThread = threading.Thread(target=record,name="recorder")
+    # recordingThread.start()
     
     #creating the connection with the server.
     createConnection()
