@@ -1,19 +1,10 @@
-import threading
-from detector import detect, record
-from webConnect import *
+from time import sleep
+from detector import detectThread
 
+detection_thread = detectThread("Detection thread")
+detection_thread.start()
 
-# starting the recording. 
-recordingThread = threading.Thread(target=record,name="recorder")
-recordingThread.start()
-
-# starting create connection and listening to connection.
-detectionListeningThread = threading.Thread(target=createConnection,name="instrution-listener")
-detectionListeningThread.start()
-
-#checking for detectBool and starting human detection if it's True.
-while True:
-    if detectBool:
-        detect(detectBool)
-        print("detection started!")
+detection_thread.set_detectBool(True)
+sleep(10)
+detection_thread.set_detectBool(False)
 
