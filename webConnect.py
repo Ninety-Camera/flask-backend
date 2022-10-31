@@ -9,6 +9,7 @@ from recorder import record
 sio = socketio.Client(reconnection_delay=10)
 state = False
 detectionThread = detectThread("detector")
+detectionThread.start()
 
 
 
@@ -31,12 +32,12 @@ def instrutionMessage(message):
     print("message recieved",message)
     if message == "STOP":
         print("Human detection deactivated!")
-        detectThread.raise_exception()
-        detectionThread.join()
+        detectionThread.set_detectBool(False)
+        
         
     elif message == "RUNNING":
         print("Human detection activated!")
-        detectionThread.start()
+        detectionThread.set_detectBool(True)
         
     
     else:
@@ -47,18 +48,9 @@ def createConnection():
         authDict = {"systemId":"00c2aa5b-9ed7-4cb9-9fd7-235f180caded"}
         sio.connect('https://ninetycamera.azurewebsites.net',auth = authDict)
     except:
-        print("establishing the connection failed!")
+        print("establishing the connection failed!\nTrying again to connect...")
+        createConnection()
         
-def main():
-    # recording starts in another thread.
-    # recordingThread = threading.Thread(target=record,name="recorder")
-    # recordingThread.start()
-    
-    #creating the connection with the server.
-    createConnection()
-    
-    print("afterwards")
-    # creating the detection thread.
-  
 
-main()
+# creating the connection with server.
+createConnection()
