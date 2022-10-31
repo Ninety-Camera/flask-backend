@@ -26,13 +26,11 @@ class detectThread(threading.Thread):
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
         
+        self.detectBool = False
+        print("Detecting thread initiated")
+        
     def run(self):
- 
-        # target function of the thread class
-        try:
-            self.detect(True)
-        finally:
-            print('ended')
+        self.detect()
     
     def get_id(self):
  
@@ -44,58 +42,66 @@ class detectThread(threading.Thread):
                 return id
             
     def raise_exception(self):
-        thread_id = self.get_id()
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-              ctypes.py_object(SystemExit))
-        if res > 1:
-            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
-            print('Exception raise failure')
+        # thread_id = self.get_id()
+        # res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
+        #       ctypes.py_object(SystemExit))
+        # if res > 1:
+        #     ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
+        #     print('Exception raise failure')
+        
+        raise ValueError
+    
+    def set_detectBool(self,bool):
+        self.detectBool = bool
+        print("Detection mode changed....")
             
     # This is the function which capture the frames from the input and output the moderated frame.
-    def detect(self,detectBool):
-        while detectBool:
+    def detect(self):
+        while True:
             success, img = self.cap.read()
             
-            blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
-            self.net.setInput(blob)
+            if self.detectBool:
             
-            layerNames = self.net.getLayerNames()
-            outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
-            outputs = self.net.forward(outputNames)
-            humanDetected = self.findHumans(outputs,img)
-            
-            if humanDetected:
-                print("human detected. starting saving a clip...")
-                startTime = datetime.now()
-                timeDifference = 0
-                frameCollection = []
+                blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
+                self.net.setInput(blob)
                 
-                while timeDifference < 5:
-                    presentTime = datetime.now()
-                    timeDifference = (presentTime - startTime).total_seconds()
-                    print("frame saving : time difference",timeDifference)
+                layerNames = self.net.getLayerNames()
+                outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
+                outputs = self.net.forward(outputNames)
+                humanDetected = self.findHumans(outputs,img)
+                
+                if humanDetected:
+                    print("human detected. starting saving a clip...")
+                    startTime = datetime.now()
+                    timeDifference = 0
+                    frameCollection = []
                     
-                    success, img = self.cap.read()
+                    while timeDifference < 5:
+                        presentTime = datetime.now()
+                        timeDifference = (presentTime - startTime).total_seconds()
+                        print("frame saving : time difference",timeDifference)
+                        
+                        success, img = self.cap.read()
 
-                    if success:
-                        blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
-                        self.net.setInput(blob)
-                        
-                        layerNames = self.net.getLayerNames()
-                        outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
-                        outputs = self.net.forward(outputNames)
-                        self.findHumans(outputs,img)
-                
-                        frameCollection.append(img)
-                        cv2.imshow('Image', img)
-                        
-                        key = cv2.waitKey(1)
-                        
-                filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
-                
-                #initializing a thread for saving suspect frames into video.    
-                videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(frameCollection,filename))
-                videoGeneratingThread.start()
+                        if success:
+                            blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
+                            self.net.setInput(blob)
+                            
+                            layerNames = self.net.getLayerNames()
+                            outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
+                            outputs = self.net.forward(outputNames)
+                            self.findHumans(outputs,img)
+                    
+                            frameCollection.append(img)
+                            cv2.imshow('Image', img)
+                            
+                            key = cv2.waitKey(1)
+                            
+                    filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
+                    
+                    #initializing a thread for saving suspect frames into video.    
+                    videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(frameCollection,filename))
+                    videoGeneratingThread.start()
                 
 
             cv2.imshow('Image', img)
