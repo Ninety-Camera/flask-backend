@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
-from datetime import datetime
+from datetime import datetime, time, timedelta
 import threading
-import ctypes
-import time
+
+from recorder import generateVideo
+
 
 class detectThread(threading.Thread):
     
@@ -57,9 +58,14 @@ class detectThread(threading.Thread):
             
     # This is the function which capture the frames from the input and output the moderated frame.
     def detect(self):
+        last_detection_time = datetime.now() - timedelta(minutes=16)
+        instrution_clip_time = 15 # seconds
+        instrution_frame_collection = []
+        instrution_clip_collecting = False
+        instrusion_clip_gap = 60*15
         while True:
             success, img = self.cap.read()
-            
+        
             if self.detectBool:
             
                 blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
@@ -70,38 +76,58 @@ class detectThread(threading.Thread):
                 outputs = self.net.forward(outputNames)
                 humanDetected = self.findHumans(outputs,img)
                 
-                if humanDetected:
-                    print("human detected. starting saving a clip...")
-                    startTime = datetime.now()
-                    timeDifference = 0
-                    frameCollection = []
-                    
-                    while timeDifference < 5:
-                        presentTime = datetime.now()
-                        timeDifference = (presentTime - startTime).total_seconds()
-                        print("frame saving : time difference",timeDifference)
+                if instrution_clip_collecting:
+                    present_instrution_clip_time = datetime.now() - last_detection_time
+                    if present_instrution_clip_time.total_seconds() >instrution_clip_time:
+                        filename = "instrution videos\suspect "+last_detection_time.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
+    
+                        #initializing a thread for saving suspect frames into video.    
+                        videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(instrution_frame_collection,filename))
+                        videoGeneratingThread.start()
                         
-                        success, img = self.cap.read()
+                        instrution_clip_collecting = False
+                    else:
+                        instrution_frame_collection.append(img)
+                        
+                elif humanDetected and (datetime.now()-last_detection_time).total_seconds()>instrusion_clip_gap:
+                    print("Instrution detected. Saving a clip from now.")
+                    instrution_frame_collection = [img]
+                    instrution_clip_collecting = True
+                    last_detection_time = datetime.now()
+                
+                
+                # if humanDetected:
+                #     print("human detected. starting saving a clip...")
+                #     startTime = datetime.now()
+                #     timeDifference = 0
+                #     frameCollection = []
+                    
+                #     while timeDifference < 5:
+                #         presentTime = datetime.now()
+                #         timeDifference = (presentTime - startTime).total_seconds()
+                #         print("frame saving : time difference",timeDifference)
+                        
+                #         success, img = self.cap.read()
 
-                        if success:
-                            blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
-                            self.net.setInput(blob)
+                #         if success:
+                #             blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
+                #             self.net.setInput(blob)
                             
-                            layerNames = self.net.getLayerNames()
-                            outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
-                            outputs = self.net.forward(outputNames)
-                            self.findHumans(outputs,img)
+                #             layerNames = self.net.getLayerNames()
+                #             outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
+                #             outputs = self.net.forward(outputNames)
+                #             self.findHumans(outputs,img)
                     
-                            frameCollection.append(img)
-                            cv2.imshow('Image', img)
+                #             frameCollection.append(img)
+                #             cv2.imshow('Image', img)
                             
-                            key = cv2.waitKey(1)
+                #             key = cv2.waitKey(1)
                             
-                    filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
+                #     filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
                     
-                    #initializing a thread for saving suspect frames into video.    
-                    videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(frameCollection,filename))
-                    videoGeneratingThread.start()
+                #     #initializing a thread for saving suspect frames into video.    
+                #     videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(frameCollection,filename))
+                #     videoGeneratingThread.start()
                 
 
             cv2.imshow('Image', img)
@@ -149,10 +175,11 @@ class detectThread(threading.Thread):
             try:
                 cv2.putText(img,f'{self.classes[classIds[i]].upper()} {int(confs[i]*100)}%',
                         (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
-                print("humans detected!")
+                # print("humans detected!")
                 humanDetected = True
             except:
-                print("nothing detected!")
+                # print("nothing detected!")
+                pass
                 
         return humanDetected
 
@@ -160,7 +187,7 @@ class detectThread(threading.Thread):
     def generateVideo(self,frames,filename):
         print("generating a video from the frames")
     
-        out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'XVID'),20,(640,480))
+        out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'XVID'),5,(640,480))
         for frame in frames:
             out.write(frame)
 
