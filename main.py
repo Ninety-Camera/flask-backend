@@ -5,6 +5,6 @@ detection_thread = detectThread("Detection thread")
 detection_thread.start()
 
 detection_thread.set_detectBool(True)
-sleep(10)
+sleep(30)
 detection_thread.set_detectBool(False)
 
