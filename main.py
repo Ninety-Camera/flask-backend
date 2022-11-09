@@ -1,10 +1,24 @@
-from time import sleep
+from flask_api import flask_api
 from detector import detectThread
+from web_connector_api import web_connector
 
-detection_thread = detectThread("Detection thread")
-detection_thread.start()
 
-detection_thread.set_detectBool(True)
-sleep(30)
-detection_thread.set_detectBool(False)
+frame_buffer = {}
+camera1 = detectThread("cam1",frame_buffer,0)
+camera1.start()
+
+
+camera2 = detectThread("cam2",frame_buffer,'http://10.10.30.209:4747/video')
+camera2.start()
+
+camera_buffer = [camera1,camera2]
+
+
+
+flask_thread = flask_api(frame_buffer,camera_buffer)
+flask_thread.start()
+
+web_connector_thread = web_connector(camera_buffer)
+web_connector_thread.start()
+
 

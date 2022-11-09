@@ -1,18 +1,21 @@
 import cv2
 import numpy as np
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 import threading
 
-from recorder import generateVideo
+
 
 
 class detectThread(threading.Thread):
     
-    def __init__(self, name):
+    def __init__(self, name,buffer,link):
         threading.Thread.__init__(self)
         self.name = name
+        self.buffer = buffer
+        self.link = link
         
-        self.cap = cv2.VideoCapture(0) #set the input here
+        
+        self.cap = cv2.VideoCapture(self.link) #set the input here
 
         self.whT = 320 # width and height of the video
         self.confThreshold =0.5
@@ -27,7 +30,7 @@ class detectThread(threading.Thread):
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
         
-        self.detectBool = False
+        self.detectBool = False # intrution detection boolean
         print("Detecting thread initiated")
         
     def run(self):
@@ -52,19 +55,24 @@ class detectThread(threading.Thread):
         
         raise ValueError
     
+    # function to change the value of the detect_bool
     def set_detectBool(self,bool):
         self.detectBool = bool
         print("Detection mode changed....")
             
     # This is the function which capture the frames from the input and output the moderated frame.
     def detect(self):
-        last_detection_time = datetime.now() - timedelta(minutes=16)
+        last_detection_time = datetime.now() - timedelta(minutes=16) # pre last detection time. This will take care of sending instrution alearts nearly.
         instrution_clip_time = 15 # seconds
-        instrution_frame_collection = []
-        instrution_clip_collecting = False
-        instrusion_clip_gap = 60*15
+        instrution_frame_collection = [] # instrution frame collection when human detected.
+        instrution_clip_collecting = False # boolean value to check, generating the instrution clip.
+        instrusion_clip_gap = 60*15 # Gap between instrution alerts.(seconds)
+        
         while True:
             success, img = self.cap.read()
+            self.buffer[self.name] = img
+            if not success:
+                continue
         
             if self.detectBool:
             
@@ -94,40 +102,7 @@ class detectThread(threading.Thread):
                     instrution_frame_collection = [img]
                     instrution_clip_collecting = True
                     last_detection_time = datetime.now()
-                
-                
-                # if humanDetected:
-                #     print("human detected. starting saving a clip...")
-                #     startTime = datetime.now()
-                #     timeDifference = 0
-                #     frameCollection = []
-                    
-                #     while timeDifference < 5:
-                #         presentTime = datetime.now()
-                #         timeDifference = (presentTime - startTime).total_seconds()
-                #         print("frame saving : time difference",timeDifference)
-                        
-                #         success, img = self.cap.read()
-
-                #         if success:
-                #             blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
-                #             self.net.setInput(blob)
-                            
-                #             layerNames = self.net.getLayerNames()
-                #             outputNames = [(layerNames[i - 1]) for i in self.net.getUnconnectedOutLayers()]
-                #             outputs = self.net.forward(outputNames)
-                #             self.findHumans(outputs,img)
-                    
-                #             frameCollection.append(img)
-                #             cv2.imshow('Image', img)
-                            
-                #             key = cv2.waitKey(1)
-                            
-                #     filename = "instrution videos\suspect "+presentTime.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
-                    
-                #     #initializing a thread for saving suspect frames into video.    
-                #     videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(frameCollection,filename))
-                #     videoGeneratingThread.start()
+            
                 
 
             cv2.imshow('Image', img)
