@@ -1,19 +1,24 @@
-import threading
-from detector import detect, record
-from webConnect import *
+from flask_api import flask_api
+from detector import detectThread
+from web_connector_api import web_connector
 
-# starting the recording. 
-recordingThread = threading.Thread(target=record,name="recorder")
-recordingThread.start()
 
-# starting create connection and listening to connection.
-detectionListeningThread = threading.Thread(target=createConnection,name="instrution-listener")
-detectionListeningThread.start()
+frame_buffer = {}
+camera1 = detectThread("cam1",frame_buffer,0)
+camera1.start()
 
-#checking for detectBool and starting human detection if it's True.
-while True:
-    if detectBool:
-        detect()
-        print("detection started!")
+
+camera2 = detectThread("cam2",frame_buffer,'http://10.10.30.209:4747/video')
+camera2.start()
+
+camera_buffer = [camera1,camera2]
+
+
+
+flask_thread = flask_api(frame_buffer,camera_buffer)
+flask_thread.start()
+
+web_connector_thread = web_connector(camera_buffer)
+web_connector_thread.start()
 
 
