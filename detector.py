@@ -74,7 +74,7 @@ class detectThread(threading.Thread):
             if not success:
                 continue
         
-            if self.detectBool:
+            if self.detectBool or instrution_clip_collecting:
             
                 blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
                 self.net.setInput(blob)
