@@ -6,9 +6,19 @@ class web_connector(threading.Thread):
         threading.Thread.__init__(self)
         self.camera_buffer = camera_buffer
         
-    def set_intrusion(self,state):
+    # method to set the intrution mode in all cameras once
+    def set_intrusion_all(self,state):
             for camera in self.camera_buffer:
                 camera.set_detectBool(state)
+                
+    # method to set the intrusion mode in a specific camera
+    def set_intrusion(self,state,camId):
+        for camera in self.camera_buffer:
+            if camera.name == camId:
+                camera.set_detectBool(state)
+                return
+        
+                
         
     def run(self):
         # standard Python
@@ -30,7 +40,6 @@ class web_connector(threading.Thread):
 
         @sio.on("intrusion-message")
         def instrutionMessage(message):
-            global detectionThread
             print("message recieved",message)
             if message == "STOP":
                 print("Human detection deactivated!")
@@ -42,6 +51,16 @@ class web_connector(threading.Thread):
                 self.set_intrusion(True)
             else:
                 print("Incorrect message!")
+                
+        @sio.on("intrution-message-camera")
+        def instrutionMessageCamera(message):
+            print("single camera off message recieved.")
+            if message == "":
+                pass
+            elif message == "":
+                pass
+            else:
+                print("incorrect message.")
                 
         def createConnection():
             try:
