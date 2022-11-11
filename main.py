@@ -12,6 +12,7 @@ camera2 = detectThread("cam2",frame_buffer,'http://10.10.30.209:4747/video')
 camera2.start()
 
 camera_buffer = [camera1,camera2]
+# camera_buffer = [camera1]
 
 
 

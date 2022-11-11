@@ -13,7 +13,10 @@ class detectThread(threading.Thread):
         self.name = name
         self.buffer = buffer
         self.link = link
+        self.recorder_frames = []
         
+        recording_thred = threading.Thread(target=self.record,name="recorder")
+        recording_thred.start()
         
         self.cap = cv2.VideoCapture(self.link) #set the input here
 
@@ -70,9 +73,11 @@ class detectThread(threading.Thread):
         
         while True:
             success, img = self.cap.read()
-            self.buffer[self.name] = img
+            
             if not success:
                 continue
+            self.buffer[self.name] = img
+            self.recorder_frames.append(img)
         
             if self.detectBool or instrution_clip_collecting:
             
@@ -157,6 +162,23 @@ class detectThread(threading.Thread):
                 pass
                 
         return humanDetected
+    
+    def record(self):
+        print("recorder started")
+        recording_gap = 60 # recording clip set to 30 minutes.
+        time_started = datetime.now()
+        while True:
+            present_time = datetime.now()
+            time_delta = (present_time - time_started).total_seconds()
+            if time_delta >= recording_gap:
+                print("saving the recorded clip.")
+                filename = "records\Record"+self.name+time_started.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
+                videoGeneratingThread = threading.Thread(target=self.generateVideo,name="record-videoGenerator",args=(self.recorder_frames,filename ))
+                videoGeneratingThread.start()
+                time_started = present_time
+                self.recorder_frames = []
+        
+        
 
     # This function will generate a video using input frame list.
     def generateVideo(self,frames,filename):
@@ -168,7 +190,7 @@ class detectThread(threading.Thread):
 
             
         out.release()
-        print("video saved!")    
+        print("video saved!",filename)    
 
 
         
