@@ -28,7 +28,7 @@ class detectThread(threading.Thread):
 
         self.classes = ["person"] # since we are only detecting humans classes contains only person.
         self.modelConfiguration = 'yolov3.cfg' # directory of the yolo config file.
-        self.modelWeights = 'yolov3.weights' # directory of the yolo weight file.
+        self.modelWeights = 'yolov3-tiny.weights' # directory of the yolo weight file.
 
 
         self.net = cv2.dnn.readNetFromDarknet(self.modelConfiguration,self.modelWeights)
@@ -93,7 +93,7 @@ class detectThread(threading.Thread):
             
                 
 
-            cv2.imshow('Image', img)
+            # cv2.imshow('Image', img)
             key = cv2.waitKey(1)
             
             # this is for terminating the program
