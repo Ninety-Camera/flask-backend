@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from datetime import datetime, timedelta
 import threading
-from image_uploader import upload_to_blob_storage
+from uploder import upload_to_blob_storage,upload_video
 import requests
 
 
@@ -40,25 +40,6 @@ class detectThread(threading.Thread):
         
     def run(self):
         self.detect()
-    
-    def get_id(self):
- 
-        # returns id of the respective thread
-        if hasattr(self, '_thread_id'):
-            return self._thread_id
-        for id, thread in threading._active.items():
-            if thread is self:
-                return id
-            
-    def raise_exception(self):
-        # thread_id = self.get_id()
-        # res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-        #       ctypes.py_object(SystemExit))
-        # if res > 1:
-        #     ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
-        #     print('Exception raise failure')
-        
-        raise ValueError
     
     # function to change the value of the detect_bool
     def set_detectBool(self,bool):
@@ -198,8 +179,9 @@ class detectThread(threading.Thread):
             # saving suspect images.
             suspect_photo_paths = []
             display_photo_paths = []
+            datetime_now = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
             for i in range(3):
-                image_name = intrusion_id+datetime.now().strftime("%m_%d_%Y_%H_%M_%S")+str(i)+'.png'
+                image_name = intrusion_id+datetime_now+str(i)+'.png'
                 supecpect_photo = cv2.imwrite('intrusion_images/'+image_name,frames[i])
                 suspect_photo_paths.append('intrusion_images/'+image_name)
                 display_photo_paths.append(intrusion_id+'/'+image_name)
@@ -216,7 +198,14 @@ class detectThread(threading.Thread):
 
             
         out.release()
-        print("video saved!",filename)
+        
+        if intrusion:
+            #sending the video to database
+            video_link = upload_video(filename,intrusion_id+"/"+datetime_now+".avi")
+            req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/video',json={"intrusionId":intrusion_id,'video':video_link},headers=header)
+            
+        
+        
         
         
 
