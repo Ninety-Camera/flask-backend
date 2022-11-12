@@ -1,17 +1,18 @@
 # flask-backend
 
 ## Before run
-### Please download yolo3.weights file using this link. 
+
+### 1. Please download yolo3.weights file using this link. 
 https://pjreddie.com/media/files/yolov3.weights
 This file uses for the detection part.
 
-### Install following python packages.
+### 2. Install following python packages.
 
 pip install azure-storage-blob azure-identity
 
 pip install python-dotenv
 
-### Create following files.
+### 3. Create following files.
 create a .env file and insert, AZURE_STORAGE_CONNECTION_STRING = 'connection string'
 
 ## Purpose

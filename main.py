@@ -7,6 +7,7 @@ from web_connector_api import web_connector
 frame_buffer = {}
 camera1 = detectThread("cam1",frame_buffer,0)
 camera1.start()
+camera1.set_detectBool(True)
 
 
 # camera2 = detectThread("cam2",frame_buffer,'http://10.10.30.209:4747/video')

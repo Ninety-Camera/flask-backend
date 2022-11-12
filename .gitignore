@@ -2,5 +2,6 @@ __pycache__
 .idea
 yolov3.weights
 instrution videos
+intrusion_images
 records
 .env
