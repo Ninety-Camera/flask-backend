@@ -51,7 +51,7 @@ def upload_video(source_filename,display_filename):
     
 def get_blob(container_name,blob_name):
         blob = BlobClient.from_connection_string(connect_str, container_name, blob_name)
-        with open("./BlockDestination.avi", "wb") as my_blob:
+        with open("./BlockDestination.mp4", "wb") as my_blob:
             blob_data = blob.download_blob()
             blob_data.readinto(my_blob)
             

@@ -75,7 +75,7 @@ class detectThread(threading.Thread):
                 if instrution_clip_collecting:
                     present_instrution_clip_time = datetime.now() - last_detection_time
                     if present_instrution_clip_time.total_seconds() >instrution_clip_time:
-                        filename = "instrution videos\suspect "+last_detection_time.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
+                        filename = "instrution videos\suspect "+last_detection_time.strftime("%m_%d_%Y_%H_%M_%S")+".mp4" 
     
                         #initializing a thread for saving suspect frames into video.    
                         videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(instrution_frame_collection,filename,True))
@@ -155,7 +155,7 @@ class detectThread(threading.Thread):
             time_delta = (present_time - time_started).total_seconds()
             if time_delta >= recording_gap:
                 print("saving the recorded clip.")
-                filename = "records\Record"+self.name+time_started.strftime("%m_%d_%Y_%H_%M_%S")+".avi" 
+                filename = "records\Record"+self.name+time_started.strftime("%m_%d_%Y_%H_%M_%S")+".mp4" 
                 videoGeneratingThread = threading.Thread(target=self.generateVideo,name="record-videoGenerator",args=(self.recorder_frames,filename ))
                 videoGeneratingThread.start()
                 time_started = present_time
@@ -191,8 +191,7 @@ class detectThread(threading.Thread):
             print(image_link_list)
         
         print("generating a video from the frames")
-    
-        out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'XVID'),5,(640,480))
+        out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'mp4v'),5,(640,480))
         for frame in frames:
             out.write(frame)
 
@@ -201,7 +200,7 @@ class detectThread(threading.Thread):
         
         if intrusion:
             #sending the video to database
-            video_link = upload_video(filename,intrusion_id+"/"+datetime_now+".avi")
+            video_link = upload_video(filename,intrusion_id+"/"+datetime_now+".mp4")
             req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/video',json={"intrusionId":intrusion_id,'video':video_link},headers=header)
             
         
