@@ -54,6 +54,7 @@ class detectThread(threading.Thread):
         instrution_clip_collecting = False # boolean value to check, generating the instrution clip.
         instrusion_clip_gap = 60*15 # Gap between instrution alerts.(seconds)
         
+        last_frame_checked = datetime.now() - timedelta(seconds=5)
         while True:
             success, img = self.cap.read()
             
@@ -61,8 +62,11 @@ class detectThread(threading.Thread):
                 continue
             self.buffer[self.name] = img
             self.recorder_frames.append(img)
+            frame_check_time_difference = (datetime.now()-last_frame_checked).total_seconds()
+            
+            
         
-            if self.detectBool or instrution_clip_collecting:
+            if (self.detectBool or instrution_clip_collecting) and frame_check_time_difference>5:
             
                 blob = cv2.dnn.blobFromImage(img,1/255,(self.whT,self.whT),[0,0,0],1,crop=False)
                 self.net.setInput(blob)
@@ -91,9 +95,13 @@ class detectThread(threading.Thread):
                     instrution_clip_collecting = True
                     last_detection_time = datetime.now()
             
-                
+            elif instrution_clip_collecting:
+                instrution_frame_collection.append(img)
+            
+            if frame_check_time_difference>5:
+                last_frame_checked = datetime.now()
 
-            # cv2.imshow('Image', img)
+            cv2.imshow('Image', img)
             key = cv2.waitKey(1)
             
             # this is for terminating the program
@@ -191,7 +199,7 @@ class detectThread(threading.Thread):
             print(image_link_list)
         
         print("generating a video from the frames")
-        out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'mp4v'),5,(640,480))
+        out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'mp4v'),10,(640,480))
         for frame in frames:
             out.write(frame)
 
