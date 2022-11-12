@@ -165,7 +165,7 @@ class detectThread(threading.Thread):
     
     def record(self):
         print("recorder started")
-        recording_gap = 60 # recording clip set to 30 minutes.
+        recording_gap = 60*30 # recording clip set to 30 minutes.
         time_started = datetime.now()
         while True:
             present_time = datetime.now()

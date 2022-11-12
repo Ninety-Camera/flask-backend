@@ -3,3 +3,4 @@ __pycache__
 yolov3.weights
 instrution videos
 records
+.env

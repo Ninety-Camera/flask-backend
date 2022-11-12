@@ -43,32 +43,32 @@ class web_connector(threading.Thread):
             print("message recieved",message)
             if message == "STOP":
                 print("Human detection deactivated!")
-                self.set_intrusion(False)
+                self.set_intrusion_all(False)
                 
                 
             elif message == "RUNNING":
                 print("Human detection activated!")
-                self.set_intrusion(True)
+                self.set_intrusion_all(True)
             else:
                 print("Incorrect message!")
                 
-        @sio.on("intrution-message-camera")
+        @sio.on("intrusion-message-camera")
         def instrutionMessageCamera(message):
-            print("single camera off message recieved.")
-            if message == "":
-                pass
-            elif message == "":
-                pass
-            else:
-                print("incorrect message.")
+            # print("single camera off message recieved.",message)
+            target_camera_id = message['name']
+            state = True if message['status'] == 'RUNNING' else False
+            
+            self.set_intrusion(state,target_camera_id)
+            
                 
         def createConnection():
             try:
                 authDict = {"systemId":"55d60bd7-4a39-4bfc-ac08-40e290444c2e"}
                 sio.connect('https://ninetycamera.azurewebsites.net',auth = authDict)
+                # sio.connect("10:10:10:249:4000",auth=authDict)
 
-            except:
-                print("trying again to connect...")
+            except Exception as e:
+                print("trying again to connect...",e)
                 createConnection()
                 
         
