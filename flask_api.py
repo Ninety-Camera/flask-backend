@@ -2,7 +2,7 @@ from flask import Flask,Response,render_template
 import cv2
 from flask_cors import CORS, cross_origin
 import threading
-from camera import detectThread
+from camera import Camera
 
 class flask_api(threading.Thread):
     
@@ -39,7 +39,7 @@ class flask_api(threading.Thread):
         @app.route('/add/camera',methods = ['POST'])
         def add_camera():
             name = 'cam1'
-            new_camera = detectThread(name,self.frame_buffer)
+            new_camera = Camera(name,self.frame_buffer)
             self.cam_buffer.append(new_camera)
             new_camera.start()
         
