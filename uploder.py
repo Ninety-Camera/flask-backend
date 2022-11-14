@@ -46,14 +46,6 @@ def upload_video(source_filename,display_filename):
         blob_client.upload_blob(data)
         
     return 'https://ninetycamera.blob.core.windows.net/'+video_container_name+'/'+display_filename
-    
-    
-    
-def get_blob(container_name,blob_name):
-        blob = BlobClient.from_connection_string(connect_str, container_name, blob_name)
-        with open("./BlockDestination.mp4", "wb") as my_blob:
-            blob_data = blob.download_blob()
-            blob_data.readinto(my_blob)
             
 
 

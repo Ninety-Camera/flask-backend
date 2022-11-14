@@ -6,3 +6,4 @@ intrusion_images
 records
 .env
 yolov3-tiny.weights
+ninetycamera.db

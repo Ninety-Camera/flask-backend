@@ -8,7 +8,7 @@ import requests
 
 
 
-class detectThread(threading.Thread):
+class Camera(threading.Thread):
     
     def __init__(self, name,buffer,link):
         threading.Thread.__init__(self)

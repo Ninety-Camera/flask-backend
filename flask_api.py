@@ -2,7 +2,7 @@ from flask import Flask,Response,render_template
 import cv2
 from flask_cors import CORS, cross_origin
 import threading
-from detector import detectThread
+from camera import detectThread
 
 class flask_api(threading.Thread):
     
@@ -33,10 +33,6 @@ class flask_api(threading.Thread):
         def video_feed(camera):
             print("Camera is: ",camera)
             return Response(gen(camera), mimetype='multipart/x-mixed-replace; boundary=frame')
-        
-        # @app.route('/video_feed/<camera>')
-        # def get_video_feed(camera):
-        #     video_feed_thread = 
         
         
         
