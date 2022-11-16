@@ -18,12 +18,16 @@ pip install python-socketio
 
 pip install opencv-python
 
+pip install flask-cors
+
 ### 3. Create following files.
 * create a .env file and insert, AZURE_STORAGE_CONNECTION_STRING = 'connection string'
 
 * create a folder intrusion_images
 
 * create a folder intrusion_videos
+
+* create a folder records
 
 ## Purpose
 This repo contains human detection part using python. 

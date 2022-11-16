@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # web_connector_thread.start()
 
     # starting the flask api which is used to pass the data to front end.
-    flask_thread = flask_api(frame_buffer,camera_buffer)
+    flask_thread = flask_api(frame_buffer,camera_buffer,db_helper)
     flask_thread.start()
     
     
