@@ -44,7 +44,4 @@ class DbHelper:
             self.db_cursor.execute(statement,(username,))
         return self.db_cursor.fetchone()
         
-
-
-
-
+    

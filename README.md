@@ -21,7 +21,7 @@ pip install opencv-python
 ### 3. Create following files.
 * create a .env file and insert, AZURE_STORAGE_CONNECTION_STRING = 'connection string'
 
-* create a folder intrution_images
+* create a folder intrusion_images
 
 * create a folder intrusion_videos
 
