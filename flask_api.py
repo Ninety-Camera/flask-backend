@@ -16,11 +16,6 @@ class flask_api(threading.Thread):
     def run(self):
         app = Flask(__name__)
         
-        @app.route('/')
-        def index():
-            # rendering webpage
-            return render_template('index.html')
-        
         def gen(camera):
             while True:
                 #get camera frame
@@ -42,6 +37,8 @@ class flask_api(threading.Thread):
             new_camera = Camera(name,self.frame_buffer)
             self.cam_buffer.append(new_camera)
             new_camera.start()
+        
+        
         
         app.run(port='5000',host='0.0.0.0')
     

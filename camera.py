@@ -10,11 +10,12 @@ import requests
 
 class Camera(threading.Thread):
     
-    def __init__(self, name,buffer,link):
+    def __init__(self, name,buffer,link,db_helper):
         threading.Thread.__init__(self)
         self.name = name
         self.buffer = buffer
         self.link = link
+        self.db_helper = db_helper
         self.recorder_frames = []
         
         recording_thred = threading.Thread(target=self.record,name="recorder")
@@ -173,21 +174,23 @@ class Camera(threading.Thread):
 
     # This function will generate a video using input frame list.
     def generateVideo(self,frames,filename,intrusion=False):
-        
+        datetime_now = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
         if intrusion:
             print("saving intrusion screen shots.")
             # sending the request
             header = {"Content-Type": "application/json; charset=utf-8",'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE3NjEwOTg4LWEyOGItNDNmYy1iNzdjLTMyNDBlYzExYTJjMyIsImVtYWlsIjoia2F2ZWVzaGFAZ21haWwuY29tIiwiaWF0IjoxNjY4MjU1NTA5LCJleHAiOjE2NjgzNTU1MDl9.QbNm6HT1uaXo6XBJJmSJ2xmUQYZLZJ3ae8yoEpEmS8s'}
 
             req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/add',json={"systemId":"55d60bd7-4a39-4bfc-ac08-40e290444c2e"},headers=header)
-            response = req.json()['data']['intrusion']
+            # response = req.json()['data']['intrusion']
+            response = req.json()
+            print(response)
             intrusion_id = response['id']
             # print(response)
             
             # saving suspect images.
             suspect_photo_paths = []
             display_photo_paths = []
-            datetime_now = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+            
             for i in range(3):
                 image_name = intrusion_id+datetime_now+str(i)+'.png'
                 supecpect_photo = cv2.imwrite('intrusion_images/'+image_name,frames[i])
@@ -211,7 +214,10 @@ class Camera(threading.Thread):
             video_link = upload_video(filename,intrusion_id+"/"+datetime_now+".mp4")
             req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/video',json={"intrusionId":intrusion_id,'video':video_link},headers=header)
             
-        
+            self.db_helper.add_intrusion(intrusion_id,filename,suspect_photo_paths[0],suspect_photo_paths[1],suspect_photo_paths[2],datetime_now)
+            
+        else:
+            self.db_helper.add_record_video(filename,datetime_now)
         
         
         
