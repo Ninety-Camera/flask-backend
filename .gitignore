@@ -7,3 +7,4 @@ records
 .env
 yolov3-tiny.weights
 ninetycamera.db
+virtualenv
