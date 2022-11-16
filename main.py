@@ -13,7 +13,7 @@ if __name__ == '__main__':
     frame_buffer = {}
     camera1 = Camera("cam1",frame_buffer,0,db_helper)
     camera1.start()
-    camera1.set_detectBool(True)
+    # camera1.set_detectBool(True)
 
 
     # camera2 = Camera("cam2",frame_buffer,'http://10.10.30.209:4747/video',db_cursor,db_connection)
@@ -24,8 +24,8 @@ if __name__ == '__main__':
     camera_buffer = [camera1]
 
     # starting the web connector with azure.
-    web_connector_thread = web_connector(camera_buffer)
-    web_connector_thread.start()
+    # web_connector_thread = web_connector(camera_buffer)
+    # web_connector_thread.start()
 
     # starting the flask api which is used to pass the data to front end.
     flask_thread = flask_api(frame_buffer,camera_buffer)

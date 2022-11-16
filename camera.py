@@ -80,7 +80,7 @@ class Camera(threading.Thread):
                 if instrution_clip_collecting:
                     present_instrution_clip_time = datetime.now() - last_detection_time
                     if present_instrution_clip_time.total_seconds() >instrution_clip_time:
-                        filename = "instrution videos\suspect "+last_detection_time.strftime("%m_%d_%Y_%H_%M_%S")+".mp4" 
+                        filename = "intrusion_videos\suspect "+last_detection_time.strftime("%m_%d_%Y_%H_%M_%S")+".mp4" 
     
                         #initializing a thread for saving suspect frames into video.    
                         videoGeneratingThread = threading.Thread(target=self.generateVideo,name="suspect-videoGenerator",args=(instrution_frame_collection,filename,True))
@@ -91,7 +91,7 @@ class Camera(threading.Thread):
                         instrution_frame_collection.append(img)
                         
                 elif humanDetected and (datetime.now()-last_detection_time).total_seconds()>instrusion_clip_gap:
-                    print("Instrution detected. Saving a clip from now.")
+                    print("Intrution detected. Saving a clip from now.")
                     instrution_frame_collection = [img]
                     instrution_clip_collecting = True
                     last_detection_time = datetime.now()
