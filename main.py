@@ -9,19 +9,22 @@ if __name__ == '__main__':
     db_helper = DbHelper()
     
     
+    
     # starting the cameras.
     frame_buffer = {}
-    camera1 = Camera("cam1",frame_buffer,0,db_helper)
-    camera1.start()
-    # camera1.set_detectBool(True)
+    camera_buffer = []
+    
+    # starting the cameras.
+    camera_details  = db_helper.get_camera_details()
+    for one_camera_details in camera_details:
+        id,name,is_ip,link = one_camera_details
 
-
-    # camera2 = Camera("cam2",frame_buffer,'http://10.10.30.209:4747/video',db_cursor,db_connection)
-    # camera2.start()
-    # camera2.set_detectBool(True)
-
-    # camera_buffer = [camera1,camera2]
-    camera_buffer = [camera1]
+        if is_ip == 1:
+            camera = Camera(name,id,frame_buffer,link,db_helper)
+        else:
+            camera = Camera(name,id,frame_buffer,int(link),db_helper)
+        camera.start()
+        camera_buffer.append(camera)
 
     # starting the web connector with azure.
     # web_connector_thread = web_connector(camera_buffer)

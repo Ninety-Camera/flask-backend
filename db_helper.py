@@ -39,6 +39,14 @@ class DbHelper:
         values = (email,id,role,token,first_name,last_name)
         with self.db_connection:
             self.db_cursor.execute(statement,values)
+        
+        
+    # function to add the camera.
+    def add_camera(self,camera_id,camera_name,is_ip_camera,camera_link):
+        statement = 'insert into camera(camera_id,camera_name,is_ip_camera,camera_link) values (?,?,?,?);'
+        with self.db_connection:
+            self.db_cursor.execute(statement,(camera_id,camera_name,is_ip_camera,camera_link))
+    
             
     # function to get the token for the user.
     def get_token(self):
@@ -60,21 +68,9 @@ class DbHelper:
         with self.db_connection:
             self.db_cursor.execute(statement)
         return self.db_cursor.fetchall()
-    
-    # function to add the camera.
-    def add_camera(self,camera_id,camera_name,is_ip_camera,camera_link):
-        statement = 'insert into camera(camera_id,camera_name,is_ip_camera,camera_link) values (?,?,?,?);'
-        with self.db_connection:
-            self.db_cursor.execute(statement,(camera_id,camera_name,is_ip_camera,camera_link))
-    
-    # function to get the camera details.
-    def get_camera_details(self):
-        statement = "select * from camera;"
-        with self.db_connection:
-            self.db_cursor.execute(statement)
-        return self.db_cursor.fetchall()
-    
-    # function to get user details
+
+    # function to get user details.
+    # output will be a one tuple which contains the user data.
     def get_user_details(self):
         statement = "select * from user_data;"
         with self.db_connection:
@@ -82,10 +78,27 @@ class DbHelper:
 
         return self.db_cursor.fetchone()
     
-    # function to delete the user data table
+
+            
+    # function to get the camera details.
+    # output will be list of tuples where one tuple got the details about one camera.
+    def get_camera_details(self):
+        statement = "select * from camera;"   
+        with self.db_connection:
+            self.db_cursor.execute(statement)
+        camera_data = self.db_cursor.fetchall()
+        return camera_data         
+        
+    # function to delete the user data table.
     def delete_userdata(self):
         with self.db_connection:
             self.db_cursor.execute('delete from user_data;')
+            
+    # function to delete the camera.
+    def delete_camera(self,camera_id):
+        with self.db_connection:
+            self.db_cursor.execute("delete from camera where camera_id = ?",(camera_id,))
         
-
+            
+   
     

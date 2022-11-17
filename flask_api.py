@@ -18,33 +18,46 @@ class flask_api(threading.Thread):
     def run(self):
         app = Flask(__name__)
         
-        def gen(camera):
+        def gen(camera_id):
             while True:
                 #get camera frame
-                ret, image = cv2.imencode('.jpg', self.frame_buffer[camera])
+                ret, image = cv2.imencode('.jpg', self.frame_buffer[camera_id])
                 image = image.tobytes()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n\r\n')
         
-        @app.route('/video_feed/<camera>')
-        def video_feed(camera):
-            print("Camera is: ",camera)
-            return Response(gen(camera), mimetype='multipart/x-mixed-replace; boundary=frame')
+        @app.route('/video_feed/<camera_id>')
+        def video_feed(camera_id):
+            print("Camera is: ",camera_id)
+            return Response(gen(camera_id), mimetype='multipart/x-mixed-replace; boundary=frame')
         
         
         
         @app.route('/add/camera',methods = ['POST'])
         @cross_origin()
         def add_camera():
-            data = request.data()
-            name = data["name"]
-            cam_id = data["cam_id"]
-            is_ip = data["is_ip_camera"]
-            link = data["source"]
-            
-            new_camera = Camera(name,self.frame_buffer,link)
-            self.cam_buffer.append(new_camera)
-            new_camera.start()
+            try:
+                data = request.get_json()
+                name = data["name"]
+                cam_id = data["id"]
+                type =data['type']
+                link = data["source"]
+                
+                if type == "IP_CAMERA":
+                    is_ip = '1'
+                    new_camera = Camera(name,cam_id,self.frame_buffer,link,self.db_helper)
+                else:
+                    is_ip = '0'
+                    new_camera = Camera(name,cam_id,self.frame_buffer,int(link),self.db_helper)
+                
+                self.cam_buffer.append(new_camera)
+                new_camera.start()
+                
+                self.db_helper.add_camera(cam_id,name,is_ip,link)
+                return Response(status=200)
+            except Exception as e:
+                print(e)
+                return Response(status=500)
             
         @app.route('/get_image/<intrusion_id>')
         def get_intrusion_image(intrusion_id):
@@ -76,12 +89,7 @@ class flask_api(threading.Thread):
             except Exception as e:
                 print(e)
                 return Response(status=500)
-                
             
-        @app.route("/")
-        @cross_origin()
-        def homepage():
-            return "done"
         
         @app.route("/get/user",methods= ["GET"])
         @cross_origin()
@@ -102,6 +110,22 @@ class flask_api(threading.Thread):
             except Exception as e:
                 print(e)
                 return Response(status=500)
+            
+        @app.route("/delete/camera/<camera_id>",methods=["DELETE"])
+        @cross_origin()
+        def delete_camera(camera_id):
+            try:
+                self.db_helper.delete_camera(camera_id)
+                for camera in self.cam_buffer:
+                    if camera.id == camera_id:
+                        camera.stop_camera()
+                        self.cam_buffer.remove(camera)
+                        break
+                return Response(status=200)
+            except Exception as e:
+                print(e)
+                return Response(status=500)
+
 
         
         

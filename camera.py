@@ -10,14 +10,16 @@ import requests
 
 class Camera(threading.Thread):
     
-    def __init__(self, name,buffer,link,db_helper):
+    def __init__(self, name,id,buffer,link,db_helper):
         threading.Thread.__init__(self)
         self.name = name
+        self.id = id
         self.buffer = buffer
         self.link = link
         self.db_helper = db_helper
         self.recorder_frames = []
         
+        # starting the recording in the camera.
         recording_thred = threading.Thread(target=self.record,name="recorder")
         recording_thred.start()
         
@@ -37,10 +39,16 @@ class Camera(threading.Thread):
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
         
         self.detectBool = False # intrution detection boolean
-        print("Detecting thread initiated")
+        self.buffer[self.id] = cv2.imread('public/loading.png') # setting the first frame as loading.
+        self.running = True
+        print(self.name,"camera initiated.")
         
     def run(self):
         self.detect()
+    
+    # function to stop the camera.
+    def stop_camera(self):
+        self.running =  False
     
     # function to change the value of the detect_bool
     def set_detectBool(self,bool):
@@ -56,12 +64,12 @@ class Camera(threading.Thread):
         instrusion_clip_gap = 60*15 # Gap between instrution alerts.(seconds)
         
         last_frame_checked = datetime.now() - timedelta(seconds=5)
-        while True:
+        while self.running:
             success, img = self.cap.read()
             
             if not success:
                 continue
-            self.buffer[self.name] = img
+            self.buffer[self.id] = img
             self.recorder_frames.append(img)
             frame_check_time_difference = (datetime.now()-last_frame_checked).total_seconds()
             
@@ -155,6 +163,7 @@ class Camera(threading.Thread):
                 
         return humanDetected
     
+    # function to do the recording part. We can change the recording gap parameter and set recording clip duration.
     def record(self):
         print("recorder started")
         recording_gap = 60*30 # recording clip set to 30 minutes.
@@ -213,11 +222,11 @@ class Camera(threading.Thread):
             #sending the video to database
             video_link = upload_video(filename,intrusion_id+"/"+datetime_now+".mp4")
             req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/video',json={"intrusionId":intrusion_id,'video':video_link},headers=header)
-            
+            # adding the intrusion to db.
             self.db_helper.add_intrusion(intrusion_id,filename,suspect_photo_paths[0],suspect_photo_paths[1],suspect_photo_paths[2],datetime_now)
             
         else:
-            self.db_helper.add_record_video(filename,datetime_now)
+            self.db_helper.add_record_video(filename,datetime_now) # adding the record to db.
         
         
         
