@@ -14,7 +14,7 @@ class web_connector(threading.Thread):
     # method to set the intrusion mode in a specific camera
     def set_intrusion(self,state,camId):
         for camera in self.camera_buffer:
-            if camera.name == camId:
+            if camera.id == camId:
                 camera.set_detectBool(state)
                 return
         

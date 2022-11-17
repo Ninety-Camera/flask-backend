@@ -187,13 +187,14 @@ class Camera(threading.Thread):
         if intrusion:
             print("saving intrusion screen shots.")
             # sending the request
-            header = {"Content-Type": "application/json; charset=utf-8",'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE3NjEwOTg4LWEyOGItNDNmYy1iNzdjLTMyNDBlYzExYTJjMyIsImVtYWlsIjoia2F2ZWVzaGFAZ21haWwuY29tIiwiaWF0IjoxNjY4MjU1NTA5LCJleHAiOjE2NjgzNTU1MDl9.QbNm6HT1uaXo6XBJJmSJ2xmUQYZLZJ3ae8yoEpEmS8s'}
+            token = self.db_helper.get_token()
+            header = {"Content-Type": "application/json; charset=utf-8",'Authorization':token}
 
             req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/add',json={"systemId":"55d60bd7-4a39-4bfc-ac08-40e290444c2e"},headers=header)
             # response = req.json()['data']['intrusion']
             response = req.json()
             print(response)
-            intrusion_id = response['id']
+            intrusion_id = response['data']['intrusion']['id']
             # print(response)
             
             # saving suspect images.
@@ -223,10 +224,10 @@ class Camera(threading.Thread):
             video_link = upload_video(filename,intrusion_id+"/"+datetime_now+".mp4")
             req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/video',json={"intrusionId":intrusion_id,'video':video_link},headers=header)
             # adding the intrusion to db.
-            self.db_helper.add_intrusion(intrusion_id,filename,suspect_photo_paths[0],suspect_photo_paths[1],suspect_photo_paths[2],datetime_now)
+            self.db_helper.add_intrusion(intrusion_id,filename,suspect_photo_paths[0],suspect_photo_paths[1],suspect_photo_paths[2],datetime.now().isoformat())
             
         else:
-            self.db_helper.add_record_video(filename,datetime_now) # adding the record to db.
+            self.db_helper.add_record_video(filename,datetime.now().isoformat()) # adding the record to db.
         
         
         

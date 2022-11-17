@@ -29,7 +29,7 @@ class DbHelper:
     # function to add recorded video path to db.  
     def add_record_video(self,video_path,date_time):
         statement = "insert into record(video_path,date_time) values (?,?);"
-        values = (video_path,date_time)
+        values = (video_path)
         with self.db_connection:
             self.db_connection.execute(statement,values)
         
@@ -64,10 +64,30 @@ class DbHelper:
     
     # function to get the all intrusion details.
     def get_all_intrusion_data(self):
-        statement = "select * from intrusion;"
+        statement = "select intrusion_id,date_time from intrusion;"
         with self.db_connection:
             self.db_cursor.execute(statement)
         return self.db_cursor.fetchall()
+        
+    
+    # function to get all intrusion id s.
+    def get_all_intrusion_id(self):
+        with self.db_connection:
+            self.db_cursor.execute("select intrusion_id from intrusion;")
+        return self.db_cursor.fetchall()
+    
+    # function to get intrusion video path
+    def get_intrusion_video(self,intrusion_id):
+        with self.db_connection:
+            self.db_cursor.execute("select video_path from intrusion where intrusion_id=?;",(intrusion_id,))
+        return self.db_cursor.fetchone()[0]
+    
+    # function to get the intrusion image path
+    def get_intrusion_image(self,intrusion_id,image_number):
+        statement = "select image"+image_number+"_path from intrusion where intrusion_id=?;"
+        with self.db_connection:
+            self.db_cursor.execute(statement,(intrusion_id,))
+        return self.db_cursor.fetchone()[0]
 
     # function to get user details.
     # output will be a one tuple which contains the user data.

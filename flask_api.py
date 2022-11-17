@@ -1,8 +1,10 @@
-from flask import Flask,Response,send_file,request,jsonify
+from flask import Flask,Response,send_file,request,jsonify,send_from_directory
 import cv2
 from flask_cors import cross_origin
 import threading
 from camera import Camera
+from pathlib import Path
+import subprocess
 
 
 class flask_api(threading.Thread):
@@ -59,17 +61,53 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
             
-        @app.route('/get_image/<intrusion_id>')
-        def get_intrusion_image(intrusion_id):
-            return send_file('intrusion_images/1.png',mimetype='image/gif')
+        @app.route('/get/image/<intrusion_id>/<image_number>',methods=["GET"])
+        @cross_origin()
+        def get_intrusion_image(intrusion_id,image_number):
+            try:
+                file_path  = self.db_helper.get_intrusion_image(intrusion_id,image_number)
+                return send_file(file_path,mimetype='image/gif')
+            except Exception as e:
+                print(e)
+                return Response(status=500)
+            
+        # function to return the all the frames of the video.
+        def gen_local_video(video_path):
+            cap = cv2.VideoCapture(video_path)
+            
+            while cap.isOpened():
+                #get camera frame
+                ret,frame = cap.read()
+                if not ret:
+                    continue
+                ret, image = cv2.imencode('.jpg', frame)
+                image = image.tobytes()
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n\r\n')
+        
+        # function to stream the intrution video.
+        
+        @app.route("/get/intrusion_video/<intrusion_id>")
+        @cross_origin()
+        def get_intrusion_video(intrusion_id):
+            try:
+                file_path = self.db_helper.get_intrusion_video(intrusion_id)
+                file_path.replace('intrusion_videos/','')
+                real_path = str(Path(__file__).parent.absolute())
+                command = 'explorer '+real_path+'\\'+file_path
+                
+                subprocess.Popen(command)
+                return Response(status=200)
+            except Exception as e:
+                print("error",e)
+                return Response(status=500)
+        
+        
         
         @app.route('/get_record')
         def get_record():
             return send_file('records/Recordcam111_11_2022_15_02_10.avi')
             
-        @app.route('/trial/<id>')
-        def home(id):
-            return "home"+id
         
         @app.route("/add/user",methods=['POST'])
         @cross_origin()
@@ -126,9 +164,18 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
 
+        @app.route("/get/intrusions",methods = ["GET"])
+        @cross_origin()
+        def get_all_intrusions():
+            try:
+                data =  self.db_helper.get_all_intrusion_data()
+                return jsonify(data=data)
+            except Exception as e:
+                print(e)
+                return Response(500)
+            
+            
 
-        
-        
         
         app.run(port='5000',host='0.0.0.0')
     
