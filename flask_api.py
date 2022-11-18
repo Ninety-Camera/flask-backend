@@ -1,4 +1,4 @@
-from flask import Flask,Response,send_file,request,jsonify,send_from_directory
+from flask import Flask,Response,send_file,request,jsonify
 import cv2
 from flask_cors import cross_origin
 import threading
@@ -34,7 +34,7 @@ class flask_api(threading.Thread):
             return Response(gen(camera_id), mimetype='multipart/x-mixed-replace; boundary=frame')
         
         
-        
+        # function to add the camera to system.
         @app.route('/add/camera',methods = ['POST'])
         @cross_origin()
         def add_camera():
@@ -61,6 +61,7 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
             
+        # function to return the intrusion images.
         @app.route('/get/image/<intrusion_id>/<image_number>',methods=["GET"])
         @cross_origin()
         def get_intrusion_image(intrusion_id,image_number):
@@ -70,23 +71,8 @@ class flask_api(threading.Thread):
             except Exception as e:
                 print(e)
                 return Response(status=500)
-            
-        # function to return the all the frames of the video.
-        def gen_local_video(video_path):
-            cap = cv2.VideoCapture(video_path)
-            
-            while cap.isOpened():
-                #get camera frame
-                ret,frame = cap.read()
-                if not ret:
-                    continue
-                ret, image = cv2.imencode('.jpg', frame)
-                image = image.tobytes()
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n\r\n')
         
         # function to stream the intrution video.
-        
         @app.route("/get/intrusion_video/<intrusion_id>")
         @cross_origin()
         def get_intrusion_video(intrusion_id):
@@ -96,19 +82,40 @@ class flask_api(threading.Thread):
                 real_path = str(Path(__file__).parent.absolute())
                 command = 'explorer '+real_path+'\\'+file_path
                 
-                subprocess.Popen(command)
+                subprocess.Popen(command) # opening the video file in a media player.
                 return Response(status=200)
             except Exception as e:
                 print("error",e)
                 return Response(status=500)
         
         
-        
-        @app.route('/get_record')
-        def get_record():
-            return send_file('records/Recordcam111_11_2022_15_02_10.avi')
+        # edit below function.
+        @app.route('/get/record_ids/<date>',methods = ["GET"])
+        @cross_origin()
+        def get_record_ids(date):
+            try:
+                data = self.db_helper.get_record_ids(date)
+                return jsonify(data=data)
+            except Exception as e:
+                print(e)
+                return Response(status=500)
             
-        
+        @app.route('/get/record/<record_id>')
+        @cross_origin()
+        def get_record(record_id):
+            try:
+                file_path = self.db_helper.get_record_video(record_id)
+                file_path.replace('records/','')
+                real_path = str(Path(__file__).parent.absolute())
+                command = 'explorer '+real_path+'\\'+file_path
+                
+                subprocess.Popen(command) # opening the video file in a media player.
+                return Response(status=200)
+            except Exception as e:
+                print("error",e)
+                return Response(status=500)
+            
+        # function to add the user to db.
         @app.route("/add/user",methods=['POST'])
         @cross_origin()
         def add_user():
@@ -128,7 +135,7 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
             
-        
+        # function to get the user details.
         @app.route("/get/user",methods= ["GET"])
         @cross_origin()
         def get_user():
@@ -139,6 +146,7 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
         
+        # function to delete the user from the database.
         @app.route("/delete/user",methods=["DELETE"])
         @cross_origin()
         def delete_user():
@@ -149,6 +157,7 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
             
+        # function to delete the camera from the db.
         @app.route("/delete/camera/<camera_id>",methods=["DELETE"])
         @cross_origin()
         def delete_camera(camera_id):
@@ -164,6 +173,7 @@ class flask_api(threading.Thread):
                 print(e)
                 return Response(status=500)
 
+        # function to get the all intrusion
         @app.route("/get/intrusions",methods = ["GET"])
         @cross_origin()
         def get_all_intrusions():
@@ -175,9 +185,4 @@ class flask_api(threading.Thread):
                 return Response(500)
             
             
-
-        
         app.run(port='5000',host='0.0.0.0')
-    
-    
-    

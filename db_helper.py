@@ -29,7 +29,7 @@ class DbHelper:
     # function to add recorded video path to db.  
     def add_record_video(self,video_path,date_time):
         statement = "insert into record(video_path,date_time) values (?,?);"
-        values = (video_path)
+        values = (video_path,date_time)
         with self.db_connection:
             self.db_connection.execute(statement,values)
         
@@ -89,6 +89,24 @@ class DbHelper:
             self.db_cursor.execute(statement,(intrusion_id,))
         return self.db_cursor.fetchone()[0]
 
+    # function to get the all recorded video id's for given day.
+    def get_record_ids(self,date):
+        statement = "select record_id,date_time from record where date_time like ?;"
+        date += "%"
+        values = (date,)
+        with self.db_connection:
+            self.db_cursor.execute(statement,values)
+        return self.db_cursor.fetchall()
+    
+    # function to get the video path when the id given.
+    def get_record_video(self,video_id):
+        statement = "select video_path from record where record_id = ?;"
+        values = (video_id,)
+        with self.db_connection:
+            self.db_cursor.execute(statement,values)
+        return self.db_cursor.fetchone()[0]
+    
+    
     # function to get user details.
     # output will be a one tuple which contains the user data.
     def get_user_details(self):
