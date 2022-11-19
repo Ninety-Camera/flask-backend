@@ -110,7 +110,7 @@ class Camera(threading.Thread):
             if frame_check_time_difference>5:
                 last_frame_checked = datetime.now()
 
-            cv2.imshow('Image', img)
+            # cv2.imshow('Image', img)
             key = cv2.waitKey(1)
             
             # this is for terminating the program

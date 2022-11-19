@@ -5,6 +5,7 @@ import threading
 from camera import Camera
 from pathlib import Path
 import subprocess
+from web_connector_api import web_connector
 
 
 class flask_api(threading.Thread):
@@ -28,6 +29,7 @@ class flask_api(threading.Thread):
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n\r\n')
         
+        # function to check connection between front end and the backend.
         @app.route("/check",methods = ["GET"])
         @cross_origin()
         def check():
@@ -138,6 +140,20 @@ class flask_api(threading.Thread):
             except Exception as e:
                 self.db_helper.update_user_token(email,token)
                 return Response(status=200)
+            
+        # function to add the system id.
+        @app.route("/system",methods=["POST"])
+        @cross_origin()
+        def add_system_id():
+            data = request.get_json()
+            system_id = data['id']
+            
+            # starting the web connector with azure.
+            web_connector_thread = web_connector(self.cam_buffer,system_id)
+            web_connector_thread.start()
+            
+            return Response(status=200)
+            
             
         # function to get the user details.
         @app.route("/get/user",methods= ["GET"])

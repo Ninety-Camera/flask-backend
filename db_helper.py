@@ -55,7 +55,7 @@ class DbHelper:
         with self.db_connection:
             self.db_cursor.execute(statement,(camera_id,camera_name,is_ip_camera,camera_link))
     
-            
+    
     # function to get the token for the user.
     def get_token(self):
         statement = "select token from user_data;"

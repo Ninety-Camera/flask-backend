@@ -7,8 +7,7 @@ from db_helper import DbHelper
 if __name__ == '__main__':
     # creating the db helper object to get the functions of the database.
     db_helper = DbHelper()
-    
-    
+   
     
     # starting the cameras.
     frame_buffer = {}
@@ -26,13 +25,11 @@ if __name__ == '__main__':
         camera.start()
         camera_buffer.append(camera)
 
-    # starting the web connector with azure.
-    web_connector_thread = web_connector(camera_buffer)
-    web_connector_thread.start()
-
     # starting the flask api which is used to pass the data to front end.
     flask_thread = flask_api(frame_buffer,camera_buffer,db_helper)
     flask_thread.start()
+    
+    
     
     
 
