@@ -28,6 +28,11 @@ class flask_api(threading.Thread):
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n\r\n')
         
+        @app.route("/check",methods = ["GET"])
+        @cross_origin()
+        def check():
+            return Response(status=200)
+        
         @app.route('/video_feed/<camera_id>')
         def video_feed(camera_id):
             print("Camera is: ",camera_id)

@@ -9,3 +9,4 @@ yolov3-tiny.weights
 ninetycamera.db
 virtualenv
 test.py
+output

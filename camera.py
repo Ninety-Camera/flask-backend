@@ -116,6 +116,7 @@ class Camera(threading.Thread):
             # this is for terminating the program
             if key == ord("q"):
                 break
+        self.cap.release()
 
 
 
