@@ -1,0 +1,11 @@
+__pycache__
+.idea
+yolov3.weights
+intrusion_videos
+intrusion_images
+records
+.env
+yolov3-tiny.weights
+ninetycamera.db
+virtualenv
+test.py
