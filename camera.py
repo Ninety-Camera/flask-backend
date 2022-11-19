@@ -167,7 +167,7 @@ class Camera(threading.Thread):
     # function to do the recording part. We can change the recording gap parameter and set recording clip duration.
     def record(self):
         print("recorder started")
-        recording_gap = 60*60 # recording clip set to 30 minutes.
+        recording_gap = 60*30 # recording clip set to 30 minutes.
         time_started = datetime.now()
         while True:
             present_time = datetime.now()

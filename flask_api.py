@@ -6,6 +6,7 @@ from camera import Camera
 from pathlib import Path
 import subprocess
 from web_connector_api import web_connector
+import os
 
 
 class flask_api(threading.Thread):
@@ -208,6 +209,12 @@ class flask_api(threading.Thread):
             except Exception as e:
                 print(e)
                 return Response(500)
+            
+        @app.route("/close",methods=["GET"])
+        @cross_origin()
+        def exit():
+            print("exiting from the backend.")
+            os._exit(1)
             
             
         app.run(port='5000',host='0.0.0.0')
