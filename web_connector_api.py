@@ -54,8 +54,8 @@ class web_connector(threading.Thread):
                 
         @sio.on("intrusion-message-camera")
         def instrutionMessageCamera(message):
-            # print("single camera off message recieved.",message)
-            target_camera_id = message['name']
+            print("single camera off message recieved.",message)
+            target_camera_id = message['id']
             state = True if message['status'] == 'RUNNING' else False
             
             self.set_intrusion(state,target_camera_id)
