@@ -119,21 +119,20 @@ class flask_api(threading.Thread):
         @app.route("/add/user",methods=['POST'])
         @cross_origin()
         def add_user():
-            try:
-                data = request.get_json()
-                print(data)
-                email = data['email']
-                user_id = data['id']
-                token = data['token']
-                first_name = data["firstName"]
-                last_name = data['lastName']
-                role = data['role']
+            data = request.get_json()
+            email = data['email']
+            user_id = data['id']
+            token = data['token']
+            first_name = data["firstName"]
+            last_name = data['lastName']
+            role = data['role']
                 
+            try:
                 self.db_helper.add_user_data(email,user_id,role,token,first_name,last_name)
                 return Response(status=201)
             except Exception as e:
-                print(e)
-                return Response(status=500)
+                self.db_helper.update_user_token(email,token)
+                return Response(status=200)
             
         # function to get the user details.
         @app.route("/get/user",methods= ["GET"])

@@ -39,6 +39,14 @@ class DbHelper:
         values = (email,id,role,token,first_name,last_name)
         with self.db_connection:
             self.db_cursor.execute(statement,values)
+            
+    # function to update the token in user data.
+    def update_user_token(self,email,token):
+        statement = "update user_data set token = ? where email=?;"
+        values = (token,email)
+        with self.db_connection:
+            self.db_cursor.execute(statement,values)
+        
         
         
     # function to add the camera.
