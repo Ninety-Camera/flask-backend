@@ -55,6 +55,21 @@ class DbHelper:
         with self.db_connection:
             self.db_cursor.execute(statement,(camera_id,camera_name,is_ip_camera,camera_link))
     
+    # function to add the sysetem id to db.
+    def add_system_id(self,system_id):
+        statement = "insert into system(system_id) values (?);"
+        values = (system_id,)
+        with self.db_connection:
+            self.db_cursor.execute(statement,values)
+            
+    # function to get the system id to db.
+    def get_system_id(self):
+        statement = "select system_id from system;"
+        with self.db_connection:
+            self.db_cursor.execute(statement)
+        return self.db_cursor.fetchone()[0]
+    
+    
     
     # function to get the token for the user.
     def get_token(self):

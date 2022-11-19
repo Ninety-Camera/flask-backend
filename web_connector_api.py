@@ -71,7 +71,8 @@ class web_connector(threading.Thread):
 
             except Exception as e:
                 print("trying again to connect...",e)
-                createConnection()
+                if str(e) != "Already connected":
+                    createConnection()
                 
         
                 

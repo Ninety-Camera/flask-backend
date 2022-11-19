@@ -191,7 +191,7 @@ class Camera(threading.Thread):
             token = self.db_helper.get_token()
             header = {"Content-Type": "application/json; charset=utf-8",'Authorization':token}
 
-            req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/add',json={"systemId":"55d60bd7-4a39-4bfc-ac08-40e290444c2e"},headers=header)
+            req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/add',json={"systemId":self.db_helper.get_system_id()},headers=header)
             # response = req.json()['data']['intrusion']
             response = req.json()
             print(response)

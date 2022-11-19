@@ -152,6 +152,11 @@ class flask_api(threading.Thread):
             web_connector_thread = web_connector(self.cam_buffer,system_id)
             web_connector_thread.start()
             
+            try:
+                self.db_helper.add_system_id(system_id)
+            except:
+                pass
+            
             return Response(status=200)
             
             
