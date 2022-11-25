@@ -65,10 +65,10 @@ Connecting to front end of the desktop application and recieve and data with ser
 ### 5. db helper
 * connecting the mysql lite 3 database with the application and performing value create, insert, select, upadate, delete functions to the database.
 * Mainly db having 4 tables. They are,
-    Camera - camera_id, camera_name, is_ip_camera, camera_link
-    Intrusion - intrusion_id, video_path, image1_path, image2_path, image3_path, date_time
-    Record - record_id, video_path, date_time
-    User_data - email, user_id, role, token, first_name, last_name
+    * Camera - camera_id, camera_name, is_ip_camera, camera_link
+    * Intrusion - intrusion_id, video_path, image1_path, image2_path, image3_path, date_time
+    * Record - record_id, video_path, date_time
+    * User_data - email, user_id, role, token, first_name, last_name
 * Adding functions.
     * add intrusion.
     * add record video

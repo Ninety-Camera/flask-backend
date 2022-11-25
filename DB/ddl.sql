@@ -29,3 +29,7 @@ create table if not exists Camera(
     is_ip_camera Number(1),
     camera_link varchar(40)
 );
+
+create table if not exists System(
+    system_id varchar(200) primary key
+);

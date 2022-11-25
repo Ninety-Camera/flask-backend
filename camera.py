@@ -110,12 +110,13 @@ class Camera(threading.Thread):
             if frame_check_time_difference>5:
                 last_frame_checked = datetime.now()
 
-            cv2.imshow('Image', img)
+            # cv2.imshow('Image', img)
             key = cv2.waitKey(1)
             
             # this is for terminating the program
             if key == ord("q"):
                 break
+        self.cap.release()
 
 
 
@@ -166,7 +167,7 @@ class Camera(threading.Thread):
     # function to do the recording part. We can change the recording gap parameter and set recording clip duration.
     def record(self):
         print("recorder started")
-        recording_gap = 60*60 # recording clip set to 30 minutes.
+        recording_gap = 60*30 # recording clip set to 30 minutes.
         time_started = datetime.now()
         while True:
             present_time = datetime.now()
@@ -190,7 +191,7 @@ class Camera(threading.Thread):
             token = self.db_helper.get_token()
             header = {"Content-Type": "application/json; charset=utf-8",'Authorization':token}
 
-            req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/add',json={"systemId":"55d60bd7-4a39-4bfc-ac08-40e290444c2e"},headers=header)
+            req = requests.post('https://ninetycamera.azurewebsites.net/api/intrusion/add',json={"systemId":self.db_helper.get_system_id()},headers=header)
             # response = req.json()['data']['intrusion']
             response = req.json()
             print(response)

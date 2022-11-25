@@ -5,6 +5,8 @@ import threading
 from camera import Camera
 from pathlib import Path
 import subprocess
+from web_connector_api import web_connector
+import os
 
 
 class flask_api(threading.Thread):
@@ -27,6 +29,12 @@ class flask_api(threading.Thread):
                 image = image.tobytes()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n\r\n')
+        
+        # function to check connection between front end and the backend.
+        @app.route("/check",methods = ["GET"])
+        @cross_origin()
+        def check():
+            return Response(status=200)
         
         @app.route('/video_feed/<camera_id>')
         def video_feed(camera_id):
@@ -134,6 +142,25 @@ class flask_api(threading.Thread):
                 self.db_helper.update_user_token(email,token)
                 return Response(status=200)
             
+        # function to add the system id.
+        @app.route("/system",methods=["POST"])
+        @cross_origin()
+        def add_system_id():
+            data = request.get_json()
+            system_id = data['id']
+            
+            # starting the web connector with azure.
+            web_connector_thread = web_connector(self.cam_buffer,system_id)
+            web_connector_thread.start()
+            
+            try:
+                self.db_helper.add_system_id(system_id)
+            except:
+                pass
+            
+            return Response(status=200)
+            
+            
         # function to get the user details.
         @app.route("/get/user",methods= ["GET"])
         @cross_origin()
@@ -182,6 +209,12 @@ class flask_api(threading.Thread):
             except Exception as e:
                 print(e)
                 return Response(500)
+            
+        @app.route("/close",methods=["GET"])
+        @cross_origin()
+        def exit():
+            print("exiting from the backend.")
+            os._exit(1)
             
             
         app.run(port='5000',host='0.0.0.0')

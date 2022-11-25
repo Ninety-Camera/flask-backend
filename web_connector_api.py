@@ -2,9 +2,10 @@ import threading
 import socketio
 
 class web_connector(threading.Thread):
-    def __init__(self,camera_buffer):
+    def __init__(self,camera_buffer,system_id):
         threading.Thread.__init__(self)
         self.camera_buffer = camera_buffer
+        self.system_id = system_id
         
     # method to set the intrution mode in all cameras once
     def set_intrusion_all(self,state):
@@ -36,6 +37,7 @@ class web_connector(threading.Thread):
         @sio.event
         def disconnect():
             print("I'm disconnected!")
+            createConnection()
 
 
         @sio.on("intrusion-message")
@@ -54,8 +56,8 @@ class web_connector(threading.Thread):
                 
         @sio.on("intrusion-message-camera")
         def instrutionMessageCamera(message):
-            # print("single camera off message recieved.",message)
-            target_camera_id = message['name']
+            print("single camera off message recieved.",message)
+            target_camera_id = message['id']
             state = True if message['status'] == 'RUNNING' else False
             
             self.set_intrusion(state,target_camera_id)
@@ -63,13 +65,14 @@ class web_connector(threading.Thread):
                 
         def createConnection():
             try:
-                authDict = {"systemId":"55d60bd7-4a39-4bfc-ac08-40e290444c2e"}
+                authDict = {"systemId":self.system_id}
                 sio.connect('https://ninetycamera.azurewebsites.net',auth = authDict)
                 # sio.connect("10:10:10:249:4000",auth=authDict)
 
             except Exception as e:
                 print("trying again to connect...",e)
-                createConnection()
+                if str(e) != "Already connected":
+                    createConnection()
                 
         
                 
